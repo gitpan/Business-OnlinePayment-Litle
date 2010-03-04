@@ -1,0 +1,20 @@
+--- #YAML:1.0
+name:                Business-OnlinePayment-Litle
+version:             0.3
+abstract:            Litle & Co. Backend for Business::OnlinePayment
+license:             perl
+author:              
+    - Jason Hall <jayce@lug-nut.com>
+generated_by:        ExtUtils::MakeMaker version 6.42
+distribution_type:   module
+requires:     
+    Business::CreditCard:          0
+    Business::OnlinePayment:       0
+    Business::OnlinePayment::HTTPS: 0
+    Test::More:                    0
+    Tie::IxHash:                   0
+    XML::Simple:                   0
+    XML::Writer:                   0
+meta-spec:
+    url:     http://module-build.sourceforge.net/META-spec-v1.3.html
+    version: 1.3
