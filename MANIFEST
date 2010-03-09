@@ -6,5 +6,4 @@ Litle.pm
 Litle/ErrorCodes.pm
 t/00-load.t
 t/card.t
-t/data.str
 META.yml                                 Module meta-data (added by MakeMaker)
