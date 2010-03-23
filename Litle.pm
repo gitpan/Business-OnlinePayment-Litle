@@ -16,7 +16,7 @@ use Data::Dumper;
 @ISA     = qw(Business::OnlinePayment::HTTPS);
 $me      = 'Business::OnlinePayment::Litle';
 $DEBUG   = 0;
-$VERSION = '0.4';
+$VERSION = '0.5';
 
 =head1 NAME
 
@@ -24,7 +24,7 @@ Business::OnlinePayment::Litle - Litle & Co. Backend for Business::OnlinePayment
 
 =head1 VERSION
 
-Version 0.4
+Version 0.5
 
 =cut
 
@@ -174,7 +174,8 @@ sub set_defaults {
     my $self = shift;
     my %opts = @_;
 
-    $self->server('cert.litle.com')         unless $self->server;
+    $self->server('https://payments.litle.com') unless $self->server;
+
     $self->port('443')                      unless $self->port;
     $self->path('/vap/communicator/online') unless $self->path;
 
@@ -217,6 +218,7 @@ sub map_fields {
         'post authorization'   => 'capture',
         'void'                 => 'void',
         'credit'               => 'credit',
+        'auth reversal'        => 'authReversal',
 
         # AVS ONLY
         # Capture Given
@@ -271,6 +273,11 @@ sub submit {
 
     $self->is_success(0);
     $self->map_fields;
+
+    if ($self->test_transaction()) {
+        $self->server('cert.litle.com');    ## alternate host for processing
+    }
+
     my %content = $self->content();
     my $action  = $content{'TransactionType'};
 
@@ -364,6 +371,9 @@ sub submit {
         invoiceReferenceNumber => 'invoice_number',    ##
         lineItemData           => \@products,
         customerReference      => 'po_number',
+        discountAmount         => 'discount',
+        shippingAmount         => 'shipping',
+        dutyAmount             => 'duty',
     );
 
     tie my %card, 'Tie::IxHash', $self->revmap_fields(
@@ -384,20 +394,29 @@ sub submit {
 
     my %req;
 
-    if (   $action eq 'sale'
-        || $action eq 'authorization' )
+    if ( $action eq 'sale' )
     {
         tie %req, 'Tie::IxHash', $self->revmap_fields(
             orderId       => 'invoice_number',
             amount        => \$amount,
             orderSource   => 'orderSource',
-            customerInfo  => \%customerinfo,
             billToAddress => \%billToAddress,
-            shipToAddress => \%shipToAddress,
             card          => \%card,
             #cardholderAuthentication    =>  \%cardholderauth,
             customBilling => \%custombilling,
             enhancedData  => \%enhanceddata,
+        );
+    }
+    if ( $action eq 'authorization' )
+    {
+        tie %req, 'Tie::IxHash', $self->revmap_fields(
+            orderId       => 'invoice_number',
+            amount        => \$amount,
+            orderSource   => 'orderSource',
+            billToAddress => \%billToAddress,
+            card          => \%card,
+            #cardholderAuthentication    =>  \%cardholderauth,
+            customBilling => \%custombilling,
         );
     }
     elsif ( $action eq 'capture' ) {
@@ -415,7 +434,6 @@ sub submit {
             litleTxnId    => 'order_number',
             amount        => \$amount,
             customBilling => \%custombilling,
-            enhancedData  => \%enhanceddata,
 
             #bypassVelocityCheck => Not supported yet
         );
@@ -424,6 +442,14 @@ sub submit {
         push @required_fields, qw( order_number );
         tie %req, 'Tie::IxHash',
           $self->revmap_fields( litleTxnId => 'order_number', );
+    }
+    elsif ( $action eq 'authReversal' ) {
+        push @required_fields, qw( order_number amount );
+        tie %req, 'Tie::IxHash', $self->revmap_fields(
+            litleTxnId    => 'order_number',
+            amount        => 'amount',
+        );
+
     }
 
     $self->required_fields(@required_fields);
@@ -478,12 +504,15 @@ sub submit {
     } else {
         die "CONNECTION FAILURE: $server_response";
     }
+    $self->{_response} = $response;
+
     warn Dumper($response) if $DEBUG;
 
     ## Set up the data:
     my $resp = $response->{ $content{'TransactionType'} . 'Response' };
     $self->order_number( $resp->{'litleTxnId'} || '' );
     $self->result_code( $resp->{'response'}    || '' );
+    $resp->{'authCode'} =~ s/\D//g if $resp->{'authCode'};
     $self->authorization( $resp->{'authCode'}  || '' );
     $self->cvv2_response( $resp->{'fraudResult'}->{'cardValidationResult'}
           || '' );
