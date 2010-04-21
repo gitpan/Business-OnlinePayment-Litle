@@ -4,6 +4,8 @@ Makefile.PL
 README
 Litle.pm
 Litle/ErrorCodes.pm
+Litle/UpdaterResponse.pm
 t/00-load.t
 t/card.t
+t/updater.t
 META.yml                                 Module meta-data (added by MakeMaker)

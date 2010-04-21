@@ -12,11 +12,13 @@ use XML::Simple;
 use Tie::IxHash;
 use Business::CreditCard qw(cardtype);
 use Data::Dumper;
+use IO::String;
+use Carp qw(croak);
 
 @ISA     = qw(Business::OnlinePayment::HTTPS);
 $me      = 'Business::OnlinePayment::Litle';
 $DEBUG   = 0;
-$VERSION = '0.5';
+$VERSION = '0.7';
 
 =head1 NAME
 
@@ -24,7 +26,7 @@ Business::OnlinePayment::Litle - Litle & Co. Backend for Business::OnlinePayment
 
 =head1 VERSION
 
-Version 0.5
+Version 0.6
 
 =cut
 
@@ -109,7 +111,7 @@ Part of the enhanced data for level III Interchange rates
     {   description =>  'First Product',
         sku         =>  'sku',
         quantity    =>  1,
-        units       =>  'Months',
+        units       =>  'Months'
         amount      =>  500,  ## currently I don't reformat this, $5.00
         discount    =>  0,
         code        =>  1,
@@ -161,6 +163,7 @@ sub _info {
                 'Authorization Only',
                 'Credit',
                 'Void',
+                'Auth Reversal',
                 ],
             },
     }
@@ -194,11 +197,12 @@ sub set_defaults {
 
     $self->build_subs(
         qw( order_number md5 avs_code cvv2_response
-          cavv_response api_version xmlns failure_status
+          cavv_response api_version xmlns failure_status batch_api_version
           )
     );
 
     $self->api_version('7.2')                   unless $self->api_version;
+    $self->batch_api_version('7.0')             unless $self->batch_api_version;
     $self->xmlns('http://www.litle.com/schema') unless $self->xmlns;
 }
 
@@ -207,11 +211,9 @@ sub set_defaults {
 =cut
 
 sub map_fields {
-    my ($self) = @_;
+    my ($self, $content) = @_;
 
-    my %content = $self->content();
-
-    my $action  = lc( $content{'action'} );
+    my $action  = lc( $content->{'action'} );
     my %actions = (
         'normal authorization' => 'sale',
         'authorization only'   => 'authorization',
@@ -219,15 +221,16 @@ sub map_fields {
         'void'                 => 'void',
         'credit'               => 'credit',
         'auth reversal'        => 'authReversal',
+        'account update'       => 'accountUpdate',
 
         # AVS ONLY
         # Capture Given
         # Force Capture
         #
     );
-    $content{'TransactionType'} = $actions{$action} || $action;
+    $content->{'TransactionType'} = $actions{$action} || $action;
 
-    $content{'company_phone'} =~ s/\D//g if $content{'company_phone'};
+    $content->{'company_phone'} =~ s/\D//g if $content->{'company_phone'};
 
     my $type_translate = {
         'VISA card'                   => 'VI',
@@ -239,64 +242,55 @@ sub map_fields {
         'China Union Pay'             => 'DI',
     };
 
-    $content{'card_type'} =
-         $type_translate->{ cardtype( $content{'card_number'} ) }
-      || $content{'type'};
+    $content->{'card_type'} =
+         $type_translate->{ cardtype( $content->{'card_number'} ) }
+      || $content->{'type'};
 
-    if ( $content{recurring_billing} && $content{recurring_billing} eq 'YES' ) {
-        $content{'orderSource'} = 'recurring';
+    if ( $content->{recurring_billing} && $content->{recurring_billing} eq 'YES' ) {
+        $content->{'orderSource'} = 'recurring';
     }
     else {
-        $content{'orderSource'} = 'ecommerce';
+        $content->{'orderSource'} = 'ecommerce';
     }
-    $content{'customerType'} =
-      $content{'orderSource'} eq 'recurring'
+    $content->{'customerType'} =
+      $content->{'orderSource'} eq 'recurring'
       ? 'Existing'
       : 'New';    # new/Existing
 
-    $content{'expiration'} =~ s/\D+//g;
+    $content->{'expiration'} =~ s/\D+//g;
 
-    $content{'deliverytype'} = 'SVC';
+    $content->{'deliverytype'} = 'SVC';
 
     # stuff it back into %content
-    if ( $content{'products'} && ref( $content{'products'} ) eq 'ARRAY' ) {
+    if ( $content->{'products'} && ref( $content->{'products'} ) eq 'ARRAY' ) {
         my $count = 1;
-        foreach ( @{ $content{'products'} } ) {
+        foreach ( @{ $content->{'products'} } ) {
             $_->{'itemSequenceNumber'} = $count++;
         }
     }
-    $self->content(%content);
+    if($content->{'cvv2'} && length( $content->{'cvv2'} ) > 4 ){
+      croak "CVV2 has too many characters";
+    }
+    $self->content( %{ $content } );
+    return $content;
 }
 
-sub submit {
-    my ($self) = @_;
+sub map_request {
+    my ($self, $content) = @_;
 
-    $self->is_success(0);
-    $self->map_fields;
+    $self->map_fields($content);
 
-    if ($self->test_transaction()) {
-        $self->server('cert.litle.com');    ## alternate host for processing
-    }
-
-    my %content = $self->content();
-    my $action  = $content{'TransactionType'};
+    my $action = $content->{'TransactionType'};
 
     my @required_fields = qw(action login type);
 
     $self->required_fields(@required_fields);
-    my $post_data;
-    my $writer = new XML::Writer(
-        OUTPUT      => \$post_data,
-        DATA_MODE   => 1,
-        DATA_INDENT => 2,
-        ENCODING    => 'utf8',
-    );
 
     # for tabbing
     # clean up the amount to the required format
     my $amount;
-    if ( defined( $content{amount} ) ) {
-        $amount = sprintf( "%.2f", $content{amount} );
+    if ( defined( $content->{amount} ) ) {
+        $amount = sprintf( "%.2f", $content->{amount} );
         $amount =~ s/\.//g;
     }
 
@@ -324,16 +318,11 @@ sub submit {
         phone => 'ship_phone',
     );
 
-    tie my %authentication, 'Tie::IxHash',
-      $self->revmap_fields(
-        user     => 'login',
-        password => 'password',
-      );
 
     tie my %customerinfo, 'Tie::IxHash',
       $self->revmap_fields( customerType => 'customerType', );
 
-    my $description = substr( $content{'description'}, 0, 25 );    # schema req
+    my $description = $content->{'description'} ? substr( $content->{'description'}, 0, 25 ): '';    # schema req
 
     tie my %custombilling, 'Tie::IxHash',
       $self->revmap_fields(
@@ -344,7 +333,8 @@ sub submit {
     ## loop through product list and generate linItemData for each
     #
     my @products = ();
-    foreach my $prod ( @{ $content{'products'} } ) {
+    foreach my $prod ( @{ $content->{'products'} } ) {
+        $prod->{'description'} = substr($prod->{'description'}, 0, 25);
         tie my %lineitem, 'Tie::IxHash',
           $self->revmap_fields(
             content              => $prod,
@@ -357,7 +347,7 @@ sub submit {
             lineItemTotal        => 'amount',
             lineItemTotalWithTax => 'totalwithtax',
             itemDiscountAmount   => 'discount',
-            commodityCode        => 'commoditycode',
+            commodityCode        => 'code',
             unitCost             => 'cost',
           );
         push @products, \%lineitem;
@@ -407,7 +397,7 @@ sub submit {
             enhancedData  => \%enhanceddata,
         );
     }
-    if ( $action eq 'authorization' )
+    elsif ( $action eq 'authorization' )
     {
         tie %req, 'Tie::IxHash', $self->revmap_fields(
             orderId       => 'invoice_number',
@@ -447,14 +437,50 @@ sub submit {
         push @required_fields, qw( order_number amount );
         tie %req, 'Tie::IxHash', $self->revmap_fields(
             litleTxnId    => 'order_number',
-            amount        => 'amount',
+            amount        => \$amount,
         );
-
+    }
+    elsif ( $action eq 'accountUpdate' ) {
+        push @required_fields, qw( card_number expiration );
+        tie %req, 'Tie::IxHash', $self->revmap_fields(
+            orderId =>  'customer_id',
+            card    =>  \%card,
+        );
     }
 
     $self->required_fields(@required_fields);
+    return \%req;
+}
 
-    #warn Dumper( \%req ) if $DEBUG;
+
+sub submit {
+    my ($self) = @_;
+
+    if ($self->test_transaction()) {
+        $self->server('cert.litle.com');    ## alternate host for processing
+    }
+    $self->is_success(0);
+
+    my %content = $self->content();
+    my $req = $self->map_request( \%content );
+    my $post_data;
+
+
+    my $writer = new XML::Writer(
+        OUTPUT      => \$post_data,
+        DATA_MODE   => 1,
+        DATA_INDENT => 2,
+        ENCODING    => 'utf8',
+    );
+
+    ## set the authentication data 
+    tie my %authentication, 'Tie::IxHash',
+      $self->revmap_fields(
+        user     => 'login',
+        password => 'password',
+      );
+
+    warn Dumper( $req ) if $DEBUG;
     ## Start the XML Document, parent tag
     $writer->xmlDecl();
     $writer->startTag(
@@ -468,11 +494,11 @@ sub submit {
     $writer->startTag(
         $content{'TransactionType'},
         id          => $content{'invoice_number'},
-        reportGroup => "Test",
+        reportGroup => $content{'report_group'} || 'BOP',
         customerId  => $content{'customer_id'} || 1, 
     );
-    foreach ( keys(%req) ) {
-        $self->_xmlwrite( $writer, $_, $req{$_} );
+    foreach ( keys( %{$req} ) ) {
+        $self->_xmlwrite( $writer, $_, $req->{$_} );
     }
 
     $writer->endTag( $content{'TransactionType'} );
@@ -540,6 +566,328 @@ sub submit {
 
 }
 
+sub parse_batch_response {
+    my ($self, $args) = @_;
+    my @results;
+    my $resp = $self->{'batch_response'};
+    $self->order_number( $resp->{'litleBatchId'} );
+    #$self->invoice_number( $resp->{'id'} );
+    my @result_types = grep { $_ =~ m/Response$/ } keys %{ $resp };  ## get a list of result types in this batch
+    return {
+            'account_update'  => $self->get_update_response,
+            ## do the other response types now
+    };
+}
+
+=head1 add_item
+
+A new method, not supported under BOP yet, but interface to adding multiple entries, so we can write and interface with batches
+
+$tx->add_item( \%content );
+
+=cut
+
+sub add_item {
+    my $self = shift;
+    ## do we want to render it now, or later?
+    push @{$self->{'batch_entries'}}, shift;
+}
+
+sub create_batch {
+    my ($self, %opts) = @_;
+    if ($self->test_transaction()) {
+        $self->server('cert.litle.com');    ## alternate host for processing
+    }
+    $self->is_success(0);
+
+    if( scalar(@{ $self->{'batch_entries'} } ) < 1 ) {
+        $self->error('Cannot create an empty batch');
+        return;
+    }
+
+
+    my $post_data;
+
+    my $writer = new XML::Writer(
+        OUTPUT      => \$post_data,
+        DATA_MODE   => 1,
+        DATA_INDENT => 2,
+        ENCODING    => 'utf8',
+    );
+    ## set the authentication data 
+    tie my %authentication, 'Tie::IxHash',
+      $self->revmap_fields(
+        content  => \%opts,
+        user     => 'login',
+        password => 'password',
+      );
+
+    ## Start the XML Document, parent tag
+    $writer->xmlDecl();
+    $writer->startTag(
+        "litleRequest",
+        version    => $self->batch_api_version,
+        xmlns      => $self->xmlns,
+        id         => $opts{'batch_id'} || time,
+        numBatchRequests => 1, #hardcoded for now, not doing multiple merchants
+    );
+
+    ## authentication
+    $self->_xmlwrite( $writer, 'authentication', \%authentication );
+    ## batch Request tag
+    $writer->startTag(
+        'batchRequest',
+        id                => $opts{'batch_id'} || time,
+        numAccountUpdates => scalar( @{ $self->{'batch_entries'} } ),
+        merchantId        => $opts{'merchantid'},
+    );
+    foreach my $entry ( @{ $self->{'batch_entries'} } ) {
+        $self->content( %{ $entry } );
+        my %content = $self->content;
+        my $req = $self->map_request( \%content );
+        $writer->startTag(
+                $content{'TransactionType'},
+                id          => $content{'invoice_number'},
+                reportGroup => $content{'report_group'} || 'BOP',
+                customerId  => $content{'customer_id'} || 1, 
+        );
+        foreach ( keys( %{$req} ) ) {
+                $self->_xmlwrite( $writer, $_, $req->{$_} );
+        }
+        $writer->endTag( $content{'TransactionType'} );
+        ## need to also handle the action tag here, and custid info
+    }
+    $writer->endTag("batchRequest");
+    $writer->endTag("litleRequest");
+    $writer->end();
+    ## END XML Generation
+
+    #----- Send it
+    if ( $opts{'method'} && $opts{'method'} eq 'sftp' ){   #FTP
+        require Net::SFTP::Foreign;
+        my $sftp = Net::SFTP::Foreign->new(
+                "cert.litle.com", 
+                user     => $opts{'ftp_username'},
+                password => $opts{'ftp_password'},
+        );
+        $sftp->error and die "SSH connection failed: " . $sftp->error;
+
+        $sftp->setcwd("inbound")
+          or die "Cannot change working directory ", $sftp->error;
+        ## save the file out, can't put directly from var, and is multibyte, so issues from filehandle
+        my $io = IO::String->new( $post_data );
+        tie *IO, 'IO::String';
+
+        my $filename = $opts{'batch_id'} || $opts{'login'} . "_" . time;
+        $sftp->put( $io, "$filename.prg" )
+          or die "Cannot PUT $filename", $sftp->error;
+        $sftp->rename( "$filename.prg", "$filename.asc" ) #once complete, you rename it, for pickup
+          or die "Cannot RENAME file", $sftp->message;
+        $self->is_success(1);
+    }
+    elsif ( $opts{'method'} && $opts{'method'} eq 'https' ){   #https post
+        $self->port('15000');
+        $self->path('/');
+        if ($self->test_transaction()) {
+            $self->server('cert.litle.com');    ## alternate host for processing
+        }
+        my ( $page, $server_response, %headers ) = $self->https_post($post_data);
+        $self->{'_post_data'} = $post_data;
+        warn $self->{'_post_data'} if $DEBUG;
+
+        warn Dumper [ $page, $server_response, \%headers] if $DEBUG;
+
+        my $response = {};
+        if ( $server_response =~ /^200/ ) {
+           $response = XMLin($page);
+           if ( exists( $response->{'response'} ) && $response->{'response'} == 1 )
+           {
+                ## parse error type error
+                print Dumper( $response, $self->{'_post_data'} );
+                $self->error_message( $response->{'message'} );
+                return;
+           }
+           else {
+                $self->error_message( $response->{'batchResponse'}->{'message'} );
+           }
+        } else {
+                die "CONNECTION FAILURE: $server_response";
+        }
+        $self->{_response} = $response;
+
+        ##parse out the batch info as our general status
+        my $resp = $response->{'batchResponse'};
+        $self->order_number( $resp->{'litleSessionId'} );
+        $self->result_code( $response->{'response'} );
+        $self->is_success( $response->{'response'} eq '0' ? 1 : 0 );
+
+        warn Dumper($response) if $DEBUG;
+        unless ( $self->is_success() ) {
+                unless ( $self->error_message() ) {
+                $self->error_message( "(HTTPS response: $server_response) "
+                        . "(HTTPS headers: "
+                        . join( ", ", map { "$_ => " . $headers{$_} } keys %headers )
+                        . ") "
+                        . "(Raw HTTPS content: $page)" );
+                }
+        }
+        if( $self->is_success() ) {
+            $self->{'batch_response'} = $resp;
+        }
+    }
+    
+}
+
+sub send_rfr {
+    my ($self, $args) = @_;
+    my $post_data;
+
+    $self->is_success(0);
+    my $writer = new XML::Writer(
+        OUTPUT      => \$post_data,
+        DATA_MODE   => 1,
+        DATA_INDENT => 2,
+        ENCODING    => 'utf8',
+    );
+    ## set the authentication data 
+    tie my %authentication, 'Tie::IxHash',
+      $self->revmap_fields(
+        content  => $args,
+        user     => 'login',
+        password => 'password',
+      );
+
+    ## Start the XML Document, parent tag
+    $writer->xmlDecl();
+    $writer->startTag(
+        "litleRequest",
+        version    => $self->batch_api_version,
+        xmlns      => $self->xmlns,
+        numBatchRequests => 0,
+    );
+
+    ## authentication
+    $self->_xmlwrite( $writer, 'authentication', \%authentication );
+    ## batch Request tag
+    $writer->startTag( 'RFRRequest');
+      $writer->startTag('accountUpdateFileRequestData');
+        $writer->startTag('merchantId');
+          $writer->characters( $args->{'merchantid'} );
+        $writer->endTag('merchantId');
+        $writer->startTag('postDay');
+          $writer->characters( $args->{'date'} );
+        $writer->endTag('postDay');
+      $writer->endTag('accountUpdateFileRequestData');
+    $writer->endTag("RFRRequest");
+    $writer->endTag("litleRequest");
+    $writer->end();
+    ## END XML Generation
+    #
+    $self->port('15000');
+    $self->path('/');
+    if ($self->test_transaction()) {
+        $self->server('cert.litle.com');    ## alternate host for processing
+    }
+    my ( $page, $server_response, %headers ) = $self->https_post($post_data);
+        $self->{'_post_data'} = $post_data;
+        warn $self->{'_post_data'} if $DEBUG;
+
+        warn Dumper [ $page, $server_response, \%headers] if $DEBUG;
+
+        my $response = {};
+        if ( $server_response =~ /^200/ ) {
+           $response = XMLin($page);
+           if ( exists( $response->{'response'} ) && $response->{'response'} == 1 )
+           {
+                ## parse error type error
+                print Dumper( $response, $self->{'_post_data'} );
+                $self->error_message( $response->{'message'} );
+                return;
+           }
+           else {
+                $self->error_message( $response->{'RFRResponse'}->{'message'} );
+           }
+        } else {
+                die "CONNECTION FAILURE: $server_response";
+        }
+        $self->{_response} = $response;
+        if($response->{'RFRResponse'}){
+            ## litle returns an 'error' if the file is not done.  So it's not ready yet.
+            $self->result_code( $response->{'RFRResponse'}->{'response'} );
+            return;
+        } else {
+            #if processed, it returns as a batch, so, success, and let get the details
+            my $resp = $response->{ 'batchResponse' };
+            $self->is_success( $resp->{'response'} eq '000' ? 1 : 0 );
+            $self->{'batch_response'} = $resp;
+            $self->parse_batch_response;
+    }
+}
+
+sub retrieve_batch {
+    my ($self, %opts) = @_;
+    croak "Missing filename" if !$opts{'batch_id'};
+    my $post_data;
+    if( $opts{'batch_return'} ){
+        ## passed in data structure
+        $post_data = $opts{'batch_return'};
+    } else {
+        ## go download a batch
+        require Net::SFTP::Foreign;
+        my $sftp = Net::SFTP::Foreign->new(
+                "cert.litle.com", 
+                user     => $opts{'ftp_username'},
+                password => $opts{'ftp_password'},
+        );
+        $sftp->error and die "SSH connection failed: " . $sftp->error;
+
+        $sftp->setcwd("outbound")
+          or die "Cannot change working directory ", $sftp->error;
+        ## save the file out, can't put directly from var, and is multibyte, so issues from filehandle
+        my $io = IO::String->new( $post_data );
+        tie *IO, 'IO::String';
+
+        my $filename = $opts{'batch_id'};
+        $sftp->get( "$filename.asc", $io )
+          or die "Cannot GET $filename", $sftp->error;
+        $self->is_success(1);
+        warn $post_data if $DEBUG;
+    }
+
+        my $response = {};
+           $response = XMLin($post_data);
+           if ( exists( $response->{'response'} ) && $response->{'response'} == 1 )
+           {
+                ## parse error type error
+                print Dumper( $response, $self->{'_post_data'} );
+                $self->error_message( $response->{'message'} );
+                return;
+           }
+           else {
+                $self->error_message( $response->{'batchResponse'}->{'message'} );
+           }
+
+        $self->{_response} = $response;
+        my $resp = $response->{'batchResponse'};
+        $self->order_number( $resp->{'litleSessionId'} );
+        $self->result_code( $response->{'response'} );
+        $self->is_success( $response->{'response'} eq '0' ? 1 : 0 );
+        if( $self->is_success() ) {
+            $self->{'batch_response'} = $resp;
+            return $self->parse_batch_response;
+        }
+}
+
+sub get_update_response {
+    my $self = shift;
+    require Business::OnlinePayment::Litle::UpdaterResponse;
+    my @response;
+    foreach my $key ( keys %{ $self->{'batch_response'}->{'accountUpdateResponse'} } ) {
+       push @response, Business::OnlinePayment::Litle::UpdaterResponse->new( $self->{'batch_response'}->{'accountUpdateResponse'}->{ $key } );
+    }
+    return \@response;
+}
+
 sub revmap_fields {
     my $self = shift;
     tie my (%map), 'Tie::IxHash', @_;
@@ -604,7 +952,7 @@ Jason Hall, C<< <jayce at lug-nut.com> >>
 
 =head1 UNIMPLEMENTED
 
-Cretain features are not yet implemented (no current personal business need), though the capability of support is there, and the test data for the verification suite is there.
+Certain features are not yet implemented (no current personal business need), though the capability of support is there, and the test data for the verification suite is there.
    
     Force Capture
     Capture Given Auth
