@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:                Business-OnlinePayment-Litle
-version:             0.7
+version:             0.7.1
 abstract:            Litle & Co. Backend for Business::OnlinePayment
 license:             perl
 author:              
@@ -12,7 +12,7 @@ requires:
     Business::OnlinePayment:       0
     Business::OnlinePayment::HTTPS: 0
     IO::String:                    0
-    Net::SFTP::Foreign:            0
+    Net::SFTP::Foreign:            1.57
     Net::SSLeay:                   0
     Test::More:                    0
     Tie::IxHash:                   0

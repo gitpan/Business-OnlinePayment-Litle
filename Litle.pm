@@ -18,7 +18,7 @@ use Carp qw(croak);
 @ISA     = qw(Business::OnlinePayment::HTTPS);
 $me      = 'Business::OnlinePayment::Litle';
 $DEBUG   = 0;
-$VERSION = '0.7';
+$VERSION = '0.7.1';
 
 =head1 NAME
 
@@ -282,7 +282,7 @@ sub map_request {
 
     my $action = $content->{'TransactionType'};
 
-    my @required_fields = qw(action login type);
+    my @required_fields = qw(action type);
 
     $self->required_fields(@required_fields);
 
