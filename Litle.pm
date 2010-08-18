@@ -18,7 +18,7 @@ use Carp qw(croak);
 @ISA     = qw(Business::OnlinePayment::HTTPS);
 $me      = 'Business::OnlinePayment::Litle';
 $DEBUG   = 0;
-$VERSION = '0.820';
+$VERSION = '0.900';
 
 =head1 NAME
 
@@ -26,7 +26,7 @@ Business::OnlinePayment::Litle - Litle & Co. Backend for Business::OnlinePayment
 
 =head1 VERSION
 
-Version 0.6
+Version 0.900
 
 =cut
 
@@ -198,11 +198,12 @@ sub set_defaults {
     $self->build_subs(
         qw( order_number md5 avs_code cvv2_response
           cavv_response api_version xmlns failure_status batch_api_version
+          is_prepaid prepaid_balance get_affluence
           )
     );
 
-    $self->api_version('7.2')                   unless $self->api_version;
-    $self->batch_api_version('7.0')             unless $self->batch_api_version;
+    $self->api_version('8.1')                   unless $self->api_version;
+    $self->batch_api_version('8.1')             unless $self->batch_api_version;
     $self->xmlns('http://www.litle.com/schema') unless $self->xmlns;
 }
 
@@ -273,6 +274,23 @@ sub map_fields {
     if ( $content->{'cvv2'} && length( $content->{'cvv2'} ) > 4 ) {
         croak "CVV2 has too many characters";
     }
+
+    if( $content->{'velocity_check'} && (
+        $content->{'velocity_check'} != 0 
+        && $content->{'velocity_check'} !~ m/false/i ) ) {
+      $content->{'velocity_check'} = 'true';
+    } else {
+      $content->{'velocity_check'} = 'false';
+    }
+
+    if( $content->{'partial_auth'} && (
+        $content->{'partial_auth'} != 0 
+        && $content->{'partial_auth'} !~ m/false/i ) ) {
+      $content->{'partial_auth'} = 'true';
+    } else {
+      $content->{'partial_auth'} = 'false';
+    }
+
     $self->content( %{$content} );
     return $content;
 }
@@ -380,6 +398,16 @@ sub map_request {
         cardAuthentication => '3ds',          # is this what we want to name it?
     );
 
+    tie my %token, 'Tie::IxHash', $self->revmap_fields(
+        litleToken         => 'token',
+        expDate            => 'expiration',
+        cardValidationNum  => 'cvv2',
+    );
+
+    tie my %processing, 'Tie::IxHash', $self->revmap_fields(
+        bypassVelocityCheck   => 'velocity_check',
+    );
+
     tie my %cardholderauth, 'Tie::IxHash',
       $self->revmap_fields(
         authenticationValue         => '3ds',
@@ -397,10 +425,13 @@ sub map_request {
             orderSource   => 'orderSource',
             billToAddress => \%billToAddress,
             card          => \%card,
+            token         => $content->{'token'} ? \%token : {},
 
             #cardholderAuthentication    =>  \%cardholderauth,
             customBilling => \%custombilling,
             enhancedData  => \%enhanceddata,
+            processingInstructions  =>  \%processing,
+            allowPartialAuth => 'partial_auth',
         );
     }
     elsif ( $action eq 'authorization' ) {
@@ -410,9 +441,11 @@ sub map_request {
             orderSource   => 'orderSource',
             billToAddress => \%billToAddress,
             card          => \%card,
-
+            token         => $content->{'token'} ? \%token : {},
             #cardholderAuthentication    =>  \%cardholderauth,
+            processingInstructions  =>  \%processing,
             customBilling => \%custombilling,
+            allowPartialAuth => 'partial_auth',
         );
     }
     elsif ( $action eq 'capture' ) {
@@ -422,6 +455,7 @@ sub map_request {
             litleTxnId   => 'order_number',
             amount       => \$amount,
             enhancedData => \%enhanceddata,
+            processingInstructions  =>  \%processing,
           );
     }
     elsif ( $action eq 'credit' ) {
@@ -430,14 +464,16 @@ sub map_request {
             litleTxnId    => 'order_number',
             amount        => \$amount,
             customBilling => \%custombilling,
-
-            #bypassVelocityCheck => Not supported yet
+            processingInstructions  =>  \%processing,
         );
     }
     elsif ( $action eq 'void' ) {
         push @required_fields, qw( order_number );
         tie %req, 'Tie::IxHash',
-          $self->revmap_fields( litleTxnId => 'order_number', );
+          $self->revmap_fields( 
+            litleTxnId              => 'order_number', 
+            processingInstructions  =>  \%processing,
+          );
     }
     elsif ( $action eq 'authReversal' ) {
         push @required_fields, qw( order_number amount );
@@ -502,6 +538,7 @@ sub submit {
         id          => $content{'invoice_number'},
         reportGroup => $content{'report_group'} || 'BOP',
         customerId  => $content{'customer_id'} || 1,
+        #partial     => $content{'partial'} ? 'true' : 'false',
     );
     foreach ( keys( %{$req} ) ) {
         $self->_xmlwrite( $writer, $_, $req->{$_} );
@@ -543,6 +580,7 @@ sub submit {
 
     ## Set up the data:
     my $resp = $response->{ $content{'TransactionType'} . 'Response' };
+    $self->{_response} = $resp;
     $self->order_number( $resp->{'litleTxnId'} || '' );
     $self->result_code( $resp->{'response'}    || '' );
     $resp->{'authCode'} =~ s/\D//g if $resp->{'authCode'};
@@ -550,8 +588,26 @@ sub submit {
     $self->cvv2_response( $resp->{'fraudResult'}->{'cardValidationResult'}
           || '' );
     $self->avs_code( $resp->{'fraudResult'}->{'avsResult'} || '' );
+    if( $resp->{enhancedAuthResponse}
+        && $resp->{enhancedAuthResponse}->{fundingSource} 
+        && $resp->{enhancedAuthResponse}->{fundingSource}->{type} eq 'PREPAID' ) {
 
+      $self->is_prepaid(1);
+      $self->prepaid_balance( $resp->{enhancedAuthResponse}->{fundingSource}->{availableBalance} );
+    } else {
+      $self->is_prepaid(0);
+    }
+
+    if( $resp->{enhancedAuthResponse}
+        && $resp->{enhancedAuthResponse}->{affluence} 
+      ){
+      $self->get_affluence( $resp->{enhancedAuthResponse}->{affluence} );
+    }
     $self->is_success( $self->result_code() eq '000' ? 1 : 0 );
+    if( $self->result_code() eq '010' ) {
+      # Partial approval, if they chose that option
+      $self->is_success(1);
+    }
 
     ##Failure Status for 3.0 users
     if ( !$self->is_success ) {
@@ -676,7 +732,7 @@ sub create_batch {
     if ( $opts{'method'} && $opts{'method'} eq 'sftp' ) {    #FTP
         require Net::SFTP::Foreign;
         my $sftp = Net::SFTP::Foreign->new(
-            "cert.litle.com",
+            $self->server(),
             user     => $opts{'ftp_username'},
             password => $opts{'ftp_password'},
         );
@@ -857,7 +913,7 @@ sub retrieve_batch {
         ## go download a batch
         require Net::SFTP::Foreign;
         my $sftp = Net::SFTP::Foreign->new(
-            "cert.litle.com",
+            $self->server(),
             user     => $opts{'ftp_username'},
             password => $opts{'ftp_password'},
         );
@@ -904,11 +960,10 @@ sub get_update_response {
     require Business::OnlinePayment::Litle::UpdaterResponse;
     my @response;
     foreach
-      my $key ( keys %{ $self->{'batch_response'}->{'accountUpdateResponse'} } )
+      my $item ( @{ $self->{'batch_response'}->{'accountUpdateResponse'} } )
     {
         push @response,
-          Business::OnlinePayment::Litle::UpdaterResponse->new(
-            $self->{'batch_response'}->{'accountUpdateResponse'}->{$key} );
+          Business::OnlinePayment::Litle::UpdaterResponse->new( $item );
     }
     return \@response;
 }
