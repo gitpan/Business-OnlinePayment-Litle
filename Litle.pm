@@ -18,7 +18,7 @@ use Carp qw(croak);
 @ISA     = qw(Business::OnlinePayment::HTTPS);
 $me      = 'Business::OnlinePayment::Litle';
 $DEBUG   = 0;
-$VERSION = '0.900';
+$VERSION = '0.901';
 
 =head1 NAME
 
@@ -356,25 +356,27 @@ sub map_request {
     ## loop through product list and generate linItemData for each
     #
     my @products = ();
-    foreach my $prod ( @{ $content->{'products'} } ) {
-        $prod->{'description'} = substr( $prod->{'description'}, 0, 25 );
-        $prod->{'code'} = substr( $prod->{'code'}, 0, 12 );
-        tie my %lineitem, 'Tie::IxHash',
-          $self->revmap_fields(
-            content              => $prod,
-            itemSequenceNumber   => 'itemSequenceNumber',
-            itemDescription      => 'description',
-            productCode          => 'code',
-            quantity             => 'quantity',
-            unitOfMeasure        => 'units',
-            taxAmount            => 'tax',
-            lineItemTotal        => 'amount',
-            lineItemTotalWithTax => 'totalwithtax',
-            itemDiscountAmount   => 'discount',
-            commodityCode        => 'code',
-            unitCost             => 'cost',
-          );
-        push @products, \%lineitem;
+    if( scalar( @{ $content->{'products'} } ) < 100 ){
+      foreach my $prod ( @{ $content->{'products'} } ) {
+          $prod->{'description'} = substr( $prod->{'description'}, 0, 25 );
+          $prod->{'code'} = substr( $prod->{'code'}, 0, 12 );
+          tie my %lineitem, 'Tie::IxHash',
+            $self->revmap_fields(
+              content              => $prod,
+              itemSequenceNumber   => 'itemSequenceNumber',
+              itemDescription      => 'description',
+              productCode          => 'code',
+              quantity             => 'quantity',
+              unitOfMeasure        => 'units',
+              taxAmount            => 'tax',
+              lineItemTotal        => 'amount',
+              lineItemTotalWithTax => 'totalwithtax',
+              itemDiscountAmount   => 'discount',
+              commodityCode        => 'code',
+              unitCost             => 'cost',
+            );
+          push @products, \%lineitem;
+      }
     }
 
     #
