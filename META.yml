@@ -1,31 +1,31 @@
---- #YAML:1.0
-name:               Business-OnlinePayment-Litle
-version:            0.910
-abstract:           Litle & Co. Backend for Business::OnlinePayment
+---
+abstract: 'Litle & Co. Backend for Business::OnlinePayment'
 author:
-    - Jason Hall <jayce@lug-nut.com>
-license:            perl
-distribution_type:  module
-configure_requires:
-    ExtUtils::MakeMaker:  0
+  - 'Jason Hall <jayce@lug-nut.com>'
 build_requires:
-    ExtUtils::MakeMaker:  0
-requires:
-    Business::CreditCard:  0
-    Business::OnlinePayment:  0
-    Business::OnlinePayment::HTTPS:  0
-    IO::String:           0
-    Net::SFTP::Foreign:   1.57
-    Net::SSLeay:          0
-    Test::More:           0
-    Tie::IxHash:          0
-    XML::Simple:          0
-    XML::Writer:          0
-no_index:
-    directory:
-        - t
-        - inc
-generated_by:       ExtUtils::MakeMaker version 6.56
+  ExtUtils::MakeMaker: 0
+configure_requires:
+  ExtUtils::MakeMaker: 0
+dynamic_config: 1
+generated_by: 'ExtUtils::MakeMaker version 6.62, CPAN::Meta::Converter version 2.120921'
+license: perl
 meta-spec:
-    url:      http://module-build.sourceforge.net/META-spec-v1.4.html
-    version:  1.4
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+name: Business-OnlinePayment-Litle
+no_index:
+  directory:
+    - t
+    - inc
+requires:
+  Business::CreditCard: 0
+  Business::OnlinePayment: 0
+  Business::OnlinePayment::HTTPS: 0
+  IO::String: 0
+  Net::SFTP::Foreign: 1.57
+  Net::SSLeay: 0
+  Test::More: 0
+  Tie::IxHash: 0
+  XML::Simple: 0
+  XML::Writer: 0
+version: 0.912

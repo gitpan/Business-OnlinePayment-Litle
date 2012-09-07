@@ -1,0 +1,50 @@
+{
+   "abstract" : "Litle & Co. Backend for Business::OnlinePayment",
+   "author" : [
+      "Jason Hall <jayce@lug-nut.com>"
+   ],
+   "dynamic_config" : 1,
+   "generated_by" : "ExtUtils::MakeMaker version 6.62, CPAN::Meta::Converter version 2.120921",
+   "license" : [
+      "perl_5"
+   ],
+   "meta-spec" : {
+      "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+      "version" : "2"
+   },
+   "name" : "Business-OnlinePayment-Litle",
+   "no_index" : {
+      "directory" : [
+         "t",
+         "inc"
+      ]
+   },
+   "prereqs" : {
+      "build" : {
+         "requires" : {
+            "ExtUtils::MakeMaker" : "0"
+         }
+      },
+      "configure" : {
+         "requires" : {
+            "ExtUtils::MakeMaker" : "0"
+         }
+      },
+      "runtime" : {
+         "requires" : {
+            "Business::CreditCard" : "0",
+            "Business::OnlinePayment" : "0",
+            "Business::OnlinePayment::HTTPS" : "0",
+            "IO::String" : "0",
+            "Net::SFTP::Foreign" : "1.57",
+            "Net::SSLeay" : "0",
+            "Test::More" : "0",
+            "Tie::IxHash" : "0",
+            "XML::Simple" : "0",
+            "XML::Writer" : "0"
+         }
+      }
+   },
+   "release_status" : "stable",
+   "version" : "0.912"
+}
