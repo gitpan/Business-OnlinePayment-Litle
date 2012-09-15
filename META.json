@@ -35,6 +35,8 @@
             "Business::CreditCard" : "0",
             "Business::OnlinePayment" : "0",
             "Business::OnlinePayment::HTTPS" : "0",
+            "HTTP::Tiny" : "0.022",
+            "IO::Socket::SSL" : "1.56",
             "IO::String" : "0",
             "Net::SFTP::Foreign" : "1.57",
             "Net::SSLeay" : "0",
@@ -46,5 +48,5 @@
       }
    },
    "release_status" : "stable",
-   "version" : "0.912"
+   "version" : "0.920"
 }
