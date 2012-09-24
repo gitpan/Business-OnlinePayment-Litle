@@ -30,4 +30,4 @@ requires:
   Tie::IxHash: 0
   XML::Simple: 0
   XML::Writer: 0
-version: 0.920
+version: 0.921
