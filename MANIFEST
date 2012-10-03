@@ -10,5 +10,6 @@ t/00-load.t
 t/card.t
 t/updater.t
 t/chargeback.t
+t/sandbox.t
 META.yml                                 Module YAML meta-data (added by MakeMaker)
 META.json                                Module JSON meta-data (added by MakeMaker)

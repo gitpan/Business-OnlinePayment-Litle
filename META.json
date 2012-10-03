@@ -38,6 +38,7 @@
             "HTTP::Tiny" : "0.022",
             "IO::Socket::SSL" : "1.56",
             "IO::String" : "0",
+            "Log::Scrubber" : "0.06",
             "Net::SFTP::Foreign" : "1.57",
             "Net::SSLeay" : "0",
             "Test::More" : "0",
@@ -48,5 +49,5 @@
       }
    },
    "release_status" : "stable",
-   "version" : "0.921"
+   "version" : "0.930"
 }
