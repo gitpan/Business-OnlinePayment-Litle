@@ -24,11 +24,11 @@ requires:
   HTTP::Tiny: 0.022
   IO::Socket::SSL: 1.56
   IO::String: 0
-  Log::Scrubber: 0.06
+  Log::Scrubber: 0.07
   Net::SFTP::Foreign: 1.57
   Net::SSLeay: 0
   Test::More: 0
   Tie::IxHash: 0
   XML::Simple: 0
   XML::Writer: 0
-version: 0.930
+version: 0.931

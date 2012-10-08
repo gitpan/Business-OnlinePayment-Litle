@@ -16,12 +16,12 @@ use Business::CreditCard qw(cardtype);
 use Data::Dumper;
 use IO::String;
 use Carp qw(croak);
-use Log::Scrubber qw($SCRUBBER scrubber :Carp);
+use Log::Scrubber qw(disable $SCRUBBER scrubber :Carp);
 
 @ISA     = qw(Business::OnlinePayment::HTTPS);
 $me      = 'Business::OnlinePayment::Litle';
 $DEBUG   = 0;
-$VERSION = '0.930';
+$VERSION = '0.931';
 
 =head1 NAME
 
@@ -29,7 +29,7 @@ Business::OnlinePayment::Litle - Litle & Co. Backend for Business::OnlinePayment
 
 =head1 VERSION
 
-Version 0.930
+Version 0.931
 
 =cut
 
@@ -299,7 +299,7 @@ sub map_fields {
     local $SCRUBBER=1;
     scrubber_init({
         ($content->{'card_number'}||'')=>'DELETED',
-        ($content->{'cvv2'}||'')=>'DELETED',
+        ($content->{'cvv2'} ? '(?<=[^\d])'.$content->{'cvv2'}.'(?=[^\d])' : '')=>'DELETED',
         ($content->{'password'}||'')=>'DELETED'},
         );
 
@@ -400,7 +400,7 @@ sub format_misc_field {
     local $SCRUBBER=1;
     scrubber_init({
         ($content->{'card_number'}||'')=>'DELETED',
-        ($content->{'cvv2'}||'')=>'DELETED',
+        ($content->{'cvv2'} ? '(?<=[^\d])'.$content->{'cvv2'}.'(?=[^\d])' : '')=>'DELETED',
         ($content->{'password'}||'')=>'DELETED'},
         );
 
@@ -470,7 +470,7 @@ sub map_request {
     local $SCRUBBER=1;
     scrubber_init({
         ($content->{'card_number'}||'')=>'DELETED',
-        ($content->{'cvv2'}||'')=>'DELETED',
+        ($content->{'cvv2'} ? '(?<=[^\d])'.$content->{'cvv2'}.'(?=[^\d])' : '')=>'DELETED',
         ($content->{'password'}||'')=>'DELETED'},
         );
 
@@ -530,6 +530,11 @@ sub map_request {
       [ 'duty',         8,      0,             1, 0 ],
       ['invoice_number',15,     0,             0, 0 ], # TODO orderID = 25, invoiceReferenceNumber = 15
       [ 'orderdate',   10,      0,             0, 0 ], # YYYY-MM-DD
+
+      [ 'recycle_by',   8,      0,             0, 0 ],
+      [ 'recycle_id',  25,      0,             0, 0 ],
+
+      [ 'affiliate',   25,      0,             0, 0 ],
 
       [ 'card_type',    2,      2,             1, 0 ],
       [ 'card_number', 25,     13,             1, 0 ],
@@ -669,6 +674,19 @@ sub map_request {
         authenticatedByMerchant     => 'authenticated',
       );
 
+    tie my %merchantdata, 'Tie::IxHash',
+      $self->revmap_fields(
+        content      => $content,
+        affiliate    => 'affiliate',
+      );
+
+    tie my %recyclingrequest, 'Tie::IxHash',
+      $self->revmap_fields(
+        content      => $content,
+        recycleBy    => 'recycle_by',
+        recycleId    => 'recycle_id',
+      );
+
     my %req;
 
     if ( $action eq 'sale' ) {
@@ -686,6 +704,8 @@ sub map_request {
             enhancedData  => \%enhanceddata,
             processingInstructions  =>  \%processing,
             allowPartialAuth => 'partial_auth',
+            merchantData => \%merchantdata,
+            recyclingRequest => \%recyclingrequest,
         );
     }
     elsif ( $action eq 'authorization' ) {
@@ -702,6 +722,8 @@ sub map_request {
             processingInstructions  =>  \%processing,
             customBilling => \%custombilling,
             allowPartialAuth => 'partial_auth',
+            merchantData     => \%merchantdata,
+            recyclingRequest => \%recyclingrequest,
         );
     }
     elsif ( $action eq 'capture' ) {
@@ -786,7 +808,7 @@ sub submit {
     local $SCRUBBER=1;
     scrubber_init({
         ($content{'card_number'}||'')=>'DELETED',
-        ($content{'cvv2'}||'')=>'DELETED',
+        ($content{'cvv2'} ? '(?<=[^\d])'.$content{'cvv2'}.'(?=[^\d])' : '')=>'DELETED',
         ($content{'password'}||'')=>'DELETED'},
         );
 
@@ -996,7 +1018,7 @@ sub litle_support_doc {
     local $SCRUBBER=1;
     scrubber_init({($content{'password'}||'')=>'DELETED'});
 
-    my $requiredargs = ['case_id','filename'];
+    my $requiredargs = ['case_id','filename','merchantid'];
     if ($action =~ /(?:UPLOAD|REPLACE)/) { push @$requiredargs, 'filecontent', 'mimetype'; }
     foreach my $key (@$requiredargs) {
         croak "Missing arg $key" unless $content{$key};
@@ -1100,6 +1122,7 @@ sub chargeback_list_support_docs {
     scrubber_init({($content{'password'}||'')=>'DELETED'});
 
     croak "Missing arg case_id" unless $content{'case_id'};
+    croak "Missing arg merchantid" unless $content{'merchantid'};
     my $caseidURI = $content{'case_id'};
     my $merchantidURI = $content{'merchantid'};
     foreach ( $caseidURI, $merchantidURI ) {
@@ -1111,7 +1134,7 @@ sub chargeback_list_support_docs {
         headers => { Authorization => 'Basic ' . MIME::Base64::encode("$content{'login'}:$content{'password'}",'') },
     } );
 
-    $self->server_request( scrubber $response->request->{'content'} );
+    $self->server_request( scrubber $url );
     $self->server_response( scrubber $response->{'content'} );
 
     my $xml_response = $self->parse_xml_response( $response->{'content'}, $response->{'status'} );
@@ -1673,13 +1696,13 @@ sub chargeback_activity_request {
     $self->{_response} = $response;
 
     my @response_list;
-    require Business::OnlinePayment::Litle::ChargebackActivityResponse;
     if (defined $response->{caseActivity} && ref $response->{caseActivity} ne 'ARRAY') {
         $response->{caseActivity} = [$response->{caseActivity}]; # make sure we are an array
     }
+    require Business::OnlinePayment::Litle::ChargebackActivityResponse;
     foreach my $case ( @{ $response->{caseActivity} } ) {
-        push @response_list,
-          Business::OnlinePayment::Litle::ChargebackActivityResponse->new($case);
+       push @response_list,
+       Business::OnlinePayment::Litle::ChargebackActivityResponse->new($case);
     }
 
     warn Dumper($response) if $DEBUG;
