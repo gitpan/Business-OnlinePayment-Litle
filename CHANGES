@@ -1,10 +1,40 @@
 ==================================================
-Changes from 2011-11-30 00:00:00 +0000 to present.
+Changes from 2011-12-06 00:00:00 +0000 to present.
 ==================================================
 
 ------------------------------------------
-version 0.933 at 2012-11-29 16:48:56 +0000
+version 0.935 at 2012-12-05 18:26:27 +0000
 ------------------------------------------
+
+  Change: 962d6afbc0af7a52d8f9ac68a9a5b91c78efbba0
+  Author: Jason (Jayce^) Hall <jayce@lug-nut.com>
+  Date : 2012-12-05 11:26:14 +0000
+
+    version bump for changes 
+
+  Change: 6a54677a467731c90c1ed27b9b5f35cdca84d3b3
+  Author: Jason (Jayce^) Hall <jayce@lug-nut.com>
+  Date : 2012-12-05 10:14:19 +0000
+
+    Net::SFTP::Foreign versions have had errors in the put_content code,
+    updating to the latest should have fixed, but doesn't always, so
+    going back to the dependable mode 
+
+  Change: 1c4950b18bb27a65805ca4afa5781308cefc878f
+  Author: Jason (Jayce^) Hall <jayce@lug-nut.com>
+  Date : 2012-12-04 15:32:11 +0000
+
+    Merge branch 'oaxlin-master'
+
+    Conflicts:
+
+    Litle.pm 
+
+  Change: e0e303b073c6a0b7d203ed46f848e9b0b553119b
+  Author: Jason Terry <jterry@jterry-laptop.(none)>
+  Date : 2012-12-04 15:26:06 +0000
+
+    Fixes for UTF-8 
 
   Change: 7e22e812b8faa1d1ef42048fa2ceae7bbf4d8280
   Author: Jason (Jayce^) Hall <jayce@lug-nut.com>
@@ -685,5 +715,5 @@ version 0.933 at 2012-11-29 16:48:56 +0000
     'em at all 
 
 ================================================
-Plus 5 releases after 2011-11-30 00:00:00 +0000.
+Plus 5 releases after 2011-12-06 00:00:00 +0000.
 ================================================
