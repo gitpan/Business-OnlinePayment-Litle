@@ -1,24 +1,98 @@
 ==================================================
-Changes from 2011-12-06 00:00:00 +0000 to present.
+Changes from 2012-12-17 00:00:00 +0000 to present.
 ==================================================
 
 ------------------------------------------
-version 0.935 at 2012-12-05 18:26:27 +0000
+version 0.938 at 2013-12-17 22:22:10 +0000
 ------------------------------------------
 
-  Change: 962d6afbc0af7a52d8f9ac68a9a5b91c78efbba0
-  Author: Jason (Jayce^) Hall <jayce@lug-nut.com>
-  Date : 2012-12-05 11:26:14 +0000
+  Change: 9a08a87f0d6b1ab642490268f6afd93b24eb1a44
+  Author: Jason Terry <jterry@jterry-mac.local>
+  Date : 2013-12-17 15:17:09 +0000
 
-    version bump for changes 
+    update service-prelive url 
 
-  Change: 6a54677a467731c90c1ed27b9b5f35cdca84d3b3
-  Author: Jason (Jayce^) Hall <jayce@lug-nut.com>
-  Date : 2012-12-05 10:14:19 +0000
+  Change: 9d7fa7ab9ebd55af2e88480f629d66e3da44389b
+  Author: Jason Terry <jterry@jterry-mac.local>
+  Date : 2013-12-17 11:28:59 +0000
 
-    Net::SFTP::Foreign versions have had errors in the put_content code,
-    updating to the latest should have fixed, but doesn't always, so
-    going back to the dependable mode 
+    Tokenization works 
+
+  Change: 87a30c4111fcbc00f4208fb39bbe4a52a88a785f
+  Author: Jason Terry <jterry@Jasons-MacBook-Pro.local>
+  Date : 2013-12-17 10:31:30 +0000
+
+    Upgrade to the new prelive/postlive urls 
+
+  Change: 2b690b81edcbc7ffa0e9c6bd494e09efa29db261
+  Author: Jason Terry <jterry@Jasons-MacBook-Pro.local>
+  Date : 2013-12-17 10:31:16 +0000
+
+    better warning when tokens are not enabled 
+
+  Change: f0736cd6dade632c9255219ad85070926b462c38
+  Author: Jason Terry <jterry@Jasons-MacBook-Pro.local>
+  Date : 2013-12-17 09:29:20 +0000
+
+    Ignore build file 
+
+  Change: e1dcf28c28eceb59578036940433e3ee35a061dc
+  Author: Jason Terry <jterry@Jasons-MacBook-Pro.local>
+  Date : 2013-12-17 09:27:54 +0000
+
+    Ignore dzil build fils 
+
+  Change: 527c8584ab8486787ec677bbe178851fc2997939
+  Author: Jason Terry <jterry@Jasons-MacBook-Pro.local>
+  Date : 2013-12-17 09:27:30 +0000
+
+    Token test 
+
+  Change: a0054cced4b28b255fc883c017e02d76b34722bd
+  Author: Jason Terry <jterry@bluehost.com>
+  Date : 2013-12-12 10:19:06 +0000
+
+    basic tokenization support 
+
+  Change: bcfb683d5a1bc59fe8556785aa396f7c196f651b
+  Author: Jason Terry <jterry@bluehost.com>
+  Date : 2013-12-12 09:58:51 +0000
+
+    update a few of the tests with new expected results 
+
+------------------------------------------
+version 0.937 at 2013-02-13 17:40:26 +0000
+------------------------------------------
+
+  Change: 0700aea6863fd8d4d5817b42834bf2b8c06f13ba
+  Author: Jason Terry <jterry@bluehost.com>
+  Date : 2013-02-13 10:40:26 +0000
+
+    Merge branch 'master' of
+    https://github.com/Jayceh/Business--OnlinePayment--Litle 
+
+  Change: 1a7d84d42ff55f8c5a01806ec36a94a962815bb7
+  Author: Jason Terry <jterry@bluehost.com>
+  Date : 2013-02-13 10:19:26 +0000
+
+    Fix chargeback_retrieve_support_doc so that it actually returns the
+    file instead of undef 
+
+  Change: 4c651e751c70da99508754b6f046dd9b6e8242f2
+  Author: Jason Terry <oaxlin@gmail.com>
+  Date : 2013-01-14 14:51:24 +0000
+
+    Merge pull request #18 from oaxlin/master
+
+    Fix create bach perfomance issue with Log::Scrubber 
+
+  Change: 33b9751c191800416beb426b5f13f6f4a6cce399
+  Author: Jason Terry <oaxlin@gmail.com>
+  Date : 2012-12-04 15:03:58 +0000
+
+    Merge pull request #17 from oaxlin/master
+
+    Litle domain name change 
 
   Change: 1c4950b18bb27a65805ca4afa5781308cefc878f
   Author: Jason (Jayce^) Hall <jayce@lug-nut.com>
@@ -29,12 +103,6 @@ version 0.935 at 2012-12-05 18:26:27 +0000
     Conflicts:
 
     Litle.pm 
-
-  Change: e0e303b073c6a0b7d203ed46f848e9b0b553119b
-  Author: Jason Terry <jterry@jterry-laptop.(none)>
-  Date : 2012-12-04 15:26:06 +0000
-
-    Fixes for UTF-8 
 
   Change: 7e22e812b8faa1d1ef42048fa2ceae7bbf4d8280
   Author: Jason (Jayce^) Hall <jayce@lug-nut.com>
@@ -52,28 +120,6 @@ version 0.935 at 2012-12-05 18:26:27 +0000
 
     Litle.pm 
 
-  Change: 42e3ae4217ab9b8005da7a6d3498a88815d330ca
-  Author: Jason Terry <jterry@jterry-laptop.(none)>
-  Date : 2012-11-29 09:07:30 +0000
-
-    Update server_request/server_response to have both a PCI scrubbed and
-    dangerous version.
-
-    Update create_batch with several fixes and logging improvments. 
-
-  Change: 374587bfc7fa93435af37a6a0611e65d378cbbc8
-  Author: Jason Terry <jterry@jterry-laptop.(none)>
-  Date : 2012-11-29 09:06:19 +0000
-
-    minor dzil update log::scrubber 0.14 required 
-
-  Change: 22060444af3c4f7c57abed0b17f20211d9ba084a
-  Author: Jason Terry <jterry@jterry-laptop.(none)>
-  Date : 2012-11-26 14:26:01 +0000
-
-    It turns out we were getting corrupted data from upstream. We do not
-    need this line. 
-
   Change: ecf5ade81fa55ad92fe6bedf9e557211180aac91
   Author: Jason (Jayce^) Hall <jayce@lug-nut.com>
   Date : 2012-10-25 11:05:49 +0000
@@ -88,71 +134,6 @@ version 0.935 at 2012-12-05 18:26:27 +0000
 
     Multiple fixes. Most importantly are the XML fix for no card, and the
     length issue for unlinked refunds 
-
-  Change: 64a1f97b6233c6d781857bf0ea62dcb2c829eb10
-  Author: Jason Terry <jterry@jterry-laptop.(none)>
-  Date : 2012-10-25 10:55:37 +0000
-
-    Merge branch 'master' of
-    https://github.com/oaxlin/Business--OnlinePayment--Litle
-
-    Conflicts:
-
-    Litle.pm
-
-    Makefile.PL 
-
-  Change: 8a422540456fd4c1c633f8571e4d2c9ad650cc80
-  Author: Jason Terry <jterry@jterry-laptop.(none)>
-  Date : 2012-10-25 09:45:46 +0000
-
-    Add a more recognizable error when you don't send a card_number or
-    card_token 
-
-  Change: 5a6f0a4d076ecaf9c6b32c0ed0478a454e07d216
-  Author: Jason Terry <jterry@jterry-laptop.(none)>
-  Date : 2012-10-25 08:57:11 +0000
-
-    Fix the TODO where invoice_number was used by two different fields,
-    with different max lengths 
-
-  Change: 11d19e7282b48aaad227931bd8196f360165c3e9
-  Author: Jason Terry <jterry@jterry-laptop.(none)>
-  Date : 2012-10-25 08:49:47 +0000
-
-    Require Log::Scrubber v0.12. Older versions have data corruption bug. 
-
-  Change: 9cedb6a2efdb1544a74bc6db8b5291f02dd5ed73
-  Author: Jason Terry <jterry@jterry-laptop.(none)>
-  Date : 2012-10-25 08:48:58 +0000
-
-    Fix token support, and add a sandbox test for litle tokens. 
-
-  Change: b0fe8b43e4328492ad7737c6a2c5b32908ad748c
-  Author: Jason Terry <jterry@jterry-laptop.(none)>
-  Date : 2012-10-17 08:54:07 +0000
-
-    Use proper lengths for orderId and invoiceReferenceNumber 
-
-  Change: e92f6624b75e5cb23987df183745d99f29136b9c
-  Author: Jason Terry <jterry@jterry-laptop.(none)>
-  Date : 2012-10-15 14:07:34 +0000
-
-    Documentation Rename some functions so they are private Add affiliate
-    and merchant_grouping_id support 
-
-  Change: cc5577de8704e81062bdbe23d54d0ae26ce84d25
-  Author: Jason Terry <jterry@jterry-laptop.(none)>
-  Date : 2012-10-15 14:07:00 +0000
-
-    New version of Log::Parser 
-
-  Change: 277084e45dbb04a33b1158fa0f8f485c5a2deaa5
-  Author: Jason Terry <jterry@jterry-laptop.(none)>
-  Date : 2012-10-15 11:14:10 +0000
-
-    Update to have basic documentation. Remove trailing spaces. Pass perl
-    critic. 
 
   Change: 242c5f4877b4103de8ca4908e7bf6c30a70c2c07
   Author: Jason (Jayce^) Hall <jayce@lug-nut.com>
@@ -181,20 +162,6 @@ version 0.935 at 2012-12-05 18:26:27 +0000
 
     Require Log::Scrubber 0.08 
 
-  Change: f0045d5e4ace6fc65e65554a5cd63d553fdd906d
-  Author: Jason Terry <jterry@jterry-laptop.(none)>
-  Date : 2012-10-08 15:55:17 +0000
-
-    Require Log::Scrubber 0.08 because 0.07 improperly tried to match
-    empty values 
-
-  Change: 76502149b699b96c5efc6db29153e9ba30bdc0c2
-  Author: Jason Terry <jterry@jterry-laptop.(none)>
-  Date : 2012-10-08 15:53:49 +0000
-
-    Require Log::Scrubber 0.08 to fix a scrubber bug with empty passwords
-    etc. Create an init script to make it easier to scrub 
-
   Change: 6199269326cd847b4452986204d82f8cf0573118
   Author: Jason (Jayce^) Hall <jayce@lug-nut.com>
   Date : 2012-10-08 09:03:03 +0000
@@ -209,46 +176,6 @@ version 0.935 at 2012-12-05 18:26:27 +0000
 
     Several fixes 
 
-  Change: 22656a5fab4ddfe0d3ae7866edffee80dc2dd940
-  Author: Jason Terry <jterry@jterry.(none)>
-  Date : 2012-10-05 11:51:24 +0000
-
-    0.06 overrides Carp in too broad a manner. 0.07 fixes this 
-
-  Change: db8528cc1135a983950bd95fe9678f614c71669c
-  Author: Jason Terry <jterry@jterry.(none)>
-  Date : 2012-10-05 11:49:31 +0000
-
-    Improve the ccv2 scrubbing so it will not scrub coincidental
-    values... For example
-
-    cvv2 = 123
-
-    phone = 1231231234
-
-    The old version would have scrubbed the phone number as well. The new
-    version will not. 
-
-  Change: eeb0b003f8877dd2a1bb90c9bc2cc3046a045d73
-  Author: Jason Terry <jterry@jterry.(none)>
-  Date : 2012-10-05 10:14:29 +0000
-
-    merchantid should be required fix a crash with
-    chargeback_list_support_docsw 
-
-  Change: c6981e2630c8e6b7520ed8dbf951d3029868a375
-  Author: Jason Terry <jterry@jterry.(none)>
-  Date : 2012-10-05 09:13:59 +0000
-
-    Revert back to an object as requested by Jayce. 
-
-  Change: 27bff67d055cd94b07baad873460ce75a5289760
-  Author: Jason Terry <jterry@jterry.(none)>
-  Date : 2012-10-05 09:05:38 +0000
-
-    Modify tests messages to be a bit more helpful. And not as noisy on a
-    basic "make test" 
-
   Change: 93fa5969332ee4cedb561fc6067c097d63fac219
   Author: Jason (Jayce^) Hall <jayce@lug-nut.com>
   Date : 2012-10-04 11:16:42 +0000
@@ -262,24 +189,6 @@ version 0.935 at 2012-12-05 18:26:27 +0000
     Merge pull request #10 from oaxlin/master
 
     Fix for chargeback_list and for scrubber 
-
-  Change: cb52429b66f0205d4bb13aca60b905f083390ef2
-  Author: Jason Terry <jterry@jterry.(none)>
-  Date : 2012-10-04 11:03:44 +0000
-
-    Return a hash instead of an object. It's easier to JSONify. 
-
-  Change: cf9a4aeba31e72fbe1c6392849becd000cfaeb05
-  Author: Jason Terry <jterry@jterry.(none)>
-  Date : 2012-10-03 16:20:06 +0000
-
-    Add affiliate and recycling data 
-
-  Change: 7cc97e058aa22647044c0296a6554dac48acd871
-  Author: Jason Terry <jterry@jterry.(none)>
-  Date : 2012-10-03 16:19:26 +0000
-
-    Test both auth and sale 
 
   Change: 811b0e3c9b85efeecdcaf4a7aed2dd1aaa71ef78
   Author: Jason (Jayce^) Hall <jayce@lug-nut.com>
@@ -301,19 +210,6 @@ version 0.935 at 2012-12-05 18:26:27 +0000
 
     Add Log::Scrubber 
 
-  Change: 807ebd0b4552b7ad1d86f613aca34999fe858040
-  Author: Jason Terry <jterry@jterry.(none)>
-  Date : 2012-10-03 15:25:31 +0000
-
-    Log::Scrubber 0.05 required perl 5.14... 0.06 updates to work on 5.10 
-
-  Change: d9c630b34bffac071fd05df9e2c503261d20aaa0
-  Author: Jason Terry <jterry@jterry.(none)>
-  Date : 2012-10-03 14:40:26 +0000
-
-    Scrub sensitive data that is run through die, warn, or sent back to
-    the user with the intent to be logged. 
-
   Change: 2e2bac02ec6c404ca9368ff8254488aad1ced8ca
   Author: Jason (Jayce^) Hall <jayce@lug-nut.com>
   Date : 2012-09-25 09:27:50 +0000
@@ -334,13 +230,6 @@ version 0.935 at 2012-12-05 18:26:27 +0000
     Merge pull request #8 from oaxlin/master
 
     Fix error in chargeback.t 
-
-  Change: 42fd207ac70f3cc00fbb7467de2edaad77af6785
-  Author: Jason Terry <jterry@jterry.(none)>
-  Date : 2012-09-25 09:13:42 +0000
-
-    Change the test to that it will properly pull resources no matter
-    what the current working directory is. 
 
   Change: 81d295a59e080f8234e30e59101fe662dd7329bf
   Author: Jason (Jayce^) Hall <jayce@lug-nut.com>
@@ -369,12 +258,6 @@ version 0.935 at 2012-12-05 18:26:27 +0000
 
     Add $tx->server_response 
 
-  Change: bd6755255b0391d7fc831ff00d38ddc11876d568
-  Author: Jason Terry <jterry@jterry.(none)>
-  Date : 2012-09-20 15:26:02 +0000
-
-    Add the $tx->server_response similar to other BOP modules 
-
   Change: e4624494b1c0b2afc224b4b0e84d9e484e470eca
   Author: Jason Hall <jayce@jaycehall.com>
   Date : 2012-09-15 10:44:42 +0000
@@ -383,337 +266,39 @@ version 0.935 at 2012-12-05 18:26:27 +0000
 
     Chargeback suite fixes. 
 
-  Change: 4ac531a97a71ac690071cf14e06f609f1f8f4e37
-  Author: Jason Terry <jterry@jterry.(none)>
-  Date : 2012-09-14 14:42:49 +0000
+------------------------------------------
+version 0.936 at 2013-01-14 22:47:09 +0000
+------------------------------------------
 
-    added images required by the unit tests 
+  Change: 233e30a85fb526923c026fe8fb0b66fff4485b08
+  Author: Jason Terry <jterry@bluehost.com>
+  Date : 2013-01-14 15:47:09 +0000
 
-  Change: ecba188bd7e0c41001175dd04b06d0f3684fa40a
-  Author: Jason Terry <jterry@jterry.(none)>
-  Date : 2012-09-14 14:42:35 +0000
+    Change init so that it resets Litle, not just the scrubber.
 
-    test resource 
+    Remove init from places that shouldn't have it. This fixes some major
+    performance issues with the batch creation system.
 
-  Change: 429019781838520297be1d28fc8c5bbdfec224fd
-  Author: Jason Terry <jterry@jterry.(none)>
-  Date : 2012-09-14 14:42:03 +0000
+    Optimize the create batch system so it does not create unnecessary
+    copies of %content. 
 
-    added all 4 tests in the litle spec 
+  Change: 02bdcf1ee70f8f7cac7beaacb449758f81b3b04c
+  Author: Jason Terry <jterry@bluehost.com>
+  Date : 2012-12-13 15:18:16 +0000
 
-  Change: 97ce047e061ad3a8174b822def564ca921d203be
-  Author: Jason Terry <jterry@jterry.(none)>
-  Date : 2012-09-14 14:41:35 +0000
+    Removed in favor of a dzil change log 
 
-    croak is easier for troubleshooting missing arguments 
+  Change: 7f31264fd00e4479e98a8a273330c0e55d6742b1
+  Author: Jason Terry <jterry@bluehost.com>
+  Date : 2012-12-13 15:14:07 +0000
 
-  Change: 69c08a360477ba4d36a3debe5b0f30602d7c38ab
-  Author: Jason Terry <jterry@jterry.(none)>
-  Date : 2012-09-14 08:28:02 +0000
+    New subs retrieve_batch_list retrieve_batch_delete
 
-    Oops, read the wrong environment variable. Fixed. 
+    Error messages are now more complete when creating and retrieving
+    batches.
 
-  Change: 966af4fb62bac457c6974a9f24453b48cd710392
-  Author: Jason Terry <jterry@jterry.(none)>
-  Date : 2012-09-14 08:27:46 +0000
-
-    Date format does require leading zeroes. 
-
-  Change: 90b5c1a195d527bb4f867452202c2f5ec928c652
-  Author: Jason Terry <jterry@jterry.(none)>
-  Date : 2012-09-13 13:20:43 +0000
-
-    Fixup chargeback_update_request 
-
-  Change: 27fe5bf430889a033ca1ce25d01515e4da0aeb4d
-  Author: Jason Terry <jterry@jterry.(none)>
-  Date : 2012-09-13 13:19:34 +0000
-
-    add test for chargeback_update_request clean up extra diag messages 
-
-  Change: 14a4ebb1215e34e339736ac28c6615c48b8b0fed
-  Author: Jason Terry <jterry@jterry.(none)>
-  Date : 2012-09-13 09:27:02 +0000
-
-    Finish testing sweet Make BOP_ACTIVITYDATE environment variable 
-
-  Change: c367992aee683db66f7e75132870255f688c97b0
-  Author: Jason Terry <jterry@jterry.(none)>
-  Date : 2012-09-13 09:26:11 +0000
-
-    Fix a bug with zero activity Add the result code value 
-
-  Change: 1f93a5982f68c7164b79e6e862ff121689cdbbb5
-  Author: Jason (Jayce^) Hall <jayce@lug-nut.com>
-  Date : 2012-09-12 14:55:54 +0000
-
-    merge errors that I missed. switch localhost to 1 
-
-  Change: b7c0b682849941ac322dbf004b2262184301a0c4
-  Author: Jason (Jayce^) Hall <jayce@lug-nut.com>
-  Date : 2012-09-12 10:57:17 +0000
-
-    Merge branch 'master' of
-    https://github.com/oaxlin/Business--OnlinePayment--Litle into
-    oaxlin-master
-
-    Conflicts:
-
-    Litle.pm
-
-    Litle/ChargebackActivityResponse.pm
-
-    t/chargeback.t 
-
-  Change: c3b7261fc814e22bf22af30a06ef9d2af4b660f4
-  Author: Jason Terry <jterry@jterry.(none)>
-  Date : 2012-09-12 10:32:00 +0000
-
-    Merged from Jayce 
-
-  Change: dd3109ebed7172b032d54db1da8a4b4bca48da32
-  Author: Jason Terry <jterry@jterry.(none)>
-  Date : 2012-09-12 10:31:25 +0000
-
-    New image 
-
-  Change: d8fe7b9f14ab081a6eb878532c80986d648d9cce
-  Author: Jason Terry <jterry@jterry.(none)>
-  Date : 2012-09-12 10:31:17 +0000
-
-    New image 
-
-  Change: 10adce12c0b608f1d15e2b9d3413e3164df47d35
-  Author: Jason Terry <jterry@jterry.(none)>
-  Date : 2012-09-12 10:30:51 +0000
-
-    New chargeback test 
-
-  Change: 4f926d3a60a33d834fd1c212281bb90914603a7e
-  Author: Jason Terry <jterry@jterry.(none)>
-  Date : 2012-09-12 10:30:15 +0000
-
-    New test script 
-
-  Change: de1f87e8e1aa2e1e038489f72acc0345dd763c43
-  Author: Jason Terry <jterry@jterry.(none)>
-  Date : 2012-09-12 10:13:18 +0000
-
-    Remove bad SSL domain 
-
-  Change: c231a73eca221f0893c3fe34dfd9df1f303e9375
-  Author: Jason Terry <jterry@jterry.(none)>
-  Date : 2012-09-12 10:06:33 +0000
-
-    Fix a minor bug in the auth test 
-
-  Change: 16b6df03f16a1d46b79f6c1d2dfd84c3b364b628
-  Author: Jason Terry <jterry@jterry.(none)>
-  Date : 2012-09-12 10:05:49 +0000
-
-    Add dependency for HTTP::Tiny 0.022. 0.022 is required to get the SSL
-    verification to work 
-
-  Change: 34c688e5dc89cff6331a28c23349be2e7b61409f
-  Author: Jason Terry <jterry@jterry.(none)>
-  Date : 2012-09-12 10:03:57 +0000
-
-    Add localhost support to make it easy to stub in features that are
-    not in the sandbox yet Add chargeback file support (upload, replace,
-    delete, retrieve, and list) 
-
-  Change: aabec6c13ba5179916cfd889ef9c9134661e9982
-  Author: Jason (Jayce^) Hall <jayce@lug-nut.com>
-  Date : 2012-09-11 13:59:00 +0000
-
-    Initial commit - module for Chargeback response Items 
-
-  Change: 29780f6544f1d29eac5b19d25a036edb77f559c4
-  Author: Jason (Jayce^) Hall <jayce@lug-nut.com>
-  Date : 2012-09-10 11:16:15 +0000
-
-    added chargebackUpdateRequest support 
-
-  Change: 87ddf67f1553ee9d3bb8381ec81dc23c67c0808a
-  Author: Jason (Jayce^) Hall <jayce@lug-nut.com>
-  Date : 2012-09-10 10:39:50 +0000
-
-    Merge branch 'master' of
-    github.com:Jayceh/Business--OnlinePayment--Litle into Chargeback 
-
-  Change: 93ebde3a8f3a75c3deffa43e0c673dc57bcf061c
-  Author: Jason (Jayce^) Hall <jayce@lug-nut.com>
-  Date : 2012-09-10 10:36:25 +0000
-
-    Implement chargebackActivitiesRequest 
-
-  Change: fcfdac4679001547d7e3e7011edad2dbfe3667d3
-  Author: Jason Terry <jterry@jterry.(none)>
-  Date : 2012-09-10 09:59:55 +0000
-
-    Add HTTP::Tiny as a pre-req 
-
-  Change: 5881eea08abc49af41c8619c081b18b87bdf0807
-  Author: Jason Hall <jayce@jaycehall.com>
-  Date : 2012-09-07 13:38:53 +0000
-
-    Merge pull request #3 from oaxlin/master
-
-    Sandbox support 
-
-  Change: 99802df7ea37c018aab658b250bd22245c9af158
-  Author: Jason Terry <jterry@jterry.(none)>
-  Date : 2012-09-07 14:35:40 +0000
-
-    Changed from $$ to -> 
-
-  Change: 71215c3f09a7d32fe6e10ecf2afc8b9710f91ccd
-  Author: Jason Terry <jterry@jterry.(none)>
-  Date : 2012-09-07 14:25:40 +0000
-
-    Add sandbox support 
-
-  Change: 2ac6a41d96bed935fc85ce35d3da8d09dc645559
-  Author: Jason (Jayce^) Hall <jayce@lug-nut.com>
-  Date : 2012-09-07 10:53:09 +0000
-
-    doc fix, does support unlinked transactions now 
-
-  Change: e21365c4965c2af5ecc2a3377d000bcb3529795c
-  Author: Jason (Jayce^) Hall <jayce@lug-nut.com>
-  Date : 2012-09-07 10:50:42 +0000
-
-    Merge branch 'master' into Chargeback 
-
-  Change: 014bd289954d5258a96c031a62fab5c878cb3c10
-  Author: Jason Hall <jayce@jaycehall.com>
-  Date : 2012-09-06 14:44:12 +0000
-
-    Merge pull request #2 from oaxlin/master
-
-    Double byte corruption 
-
-  Change: df0e47b6567ecfde44c93f95ab150c85be7b4405
-  Author: Jason Terry <jterry@jterry.(none)>
-  Date : 2012-09-06 09:15:31 +0000
-
-    Remove the regular expression hack and add a cleaner utf8::decode to
-    fix double byte corruption 
-
-  Change: 609c6664192ff1f1345fe91a170ad3c7ed7dd27c
-  Author: Jason Hall <jayce@jaycehall.com>
-  Date : 2012-09-05 14:05:33 +0000
-
-    Merge pull request #1 from oaxlin/master
-
-    Pre-discussed sanity captures of XML parsing, as well as data
-    validation methods. 
-
-  Change: 91195fc6537d5d540a79dd8b35ee4b3d35eb8dd7
-  Author: Jason Terry <jterry@jterry.(none)>
-  Date : 2012-09-05 14:45:08 +0000
-
-    1) Documentation 2) A hack fix to the XML post data length. 
-
-  Change: 1a72b472a55e20ed5a908d1ae488193823a20256
-  Author: root <root@jterry.(none)>
-  Date : 2012-08-31 12:48:19 +0000
-
-    1) Make expiration date work for many common date formats 2) Make
-    company_phone work for values like 1-800-Try-This 3) Truncate text in
-    many fields if they are too long 4) Removed non-existent
-    “cardAuthenticaton” field 5) Fix amount fields so they are sent
-    in the proper format ($5.00 = 500) 6) Add extra help for brand new
-    users of Litle, to tell them they need to whitelist 
-
-  Change: c3392a6f9adbc9ab9d2a6cdf89e9dfc22597143a
-  Author: Jason Terry <jterry@jterry.(none)>
-  Date : 2012-08-29 13:58:33 +0000
-
-    Protect the remaining XMLin calls. 
-
-  Change: f2d1d3ec393a236b63e83d2352d639cf9863978d
-  Author: Jason Terry <jterry@jterry.(none)>
-  Date : 2012-08-28 16:23:27 +0000
-
-    Protect XMLin 
-
-  Change: d7d421226b95259ffb305069529f24f5f7df9eb9
-  Author: Jason (Jayce^) Hall <jayce@lug-nut.com>
-  Date : 2012-01-18 15:17:51 +0000
-
-    Chargeback Daily List, and Change status (First versions) 
-
-  Change: 89310f30931976ecb5a7978c9308bd213364240a
-  Author: Jason (Jayce^) Hall <jayce@lug-nut.com>
-  Date : 2011-09-12 13:50:16 +0000
-
-    Duh, filename already has extension from the server using this model. 
-
-  Change: 217ddd3dee9262fc9a623d930e6257f15f3a25de
-  Author: Jason (Jayce^) Hall <jayce@lug-nut.com>
-  Date : 2011-09-07 13:49:56 +0000
-
-    get_content now working it seems. Allows us to bypass my recreation
-    of the functionality of getting the content without writing the file 
-
-  Change: b29d8a75457ccf09b5f73bbc492830e4ad3b62eb
-  Author: Jason (Jayce^) Hall <jayce@lug-nut.com>
-  Date : 2011-06-07 11:22:04 +0000
-
-    Bump in the version number for building 
-
-  Change: d912d50cacc0e75bfa3c4f5b4036fc48fd3e92d8
-  Author: Jason (Jayce^) Hall <jayce@lug-nut.com>
-  Date : 2011-06-07 11:18:27 +0000
-
-    -Cleanup size truncation method some, enforce field size restrictions
-    -Cleanup partial capture ability, shoudl allow for a partial flag in
-    the content that will let you do partial captures -cleanup unused
-    is_dupe that would cause errors -Fix several broken tests with
-    changed data in our current testing env -- I've noticed several tests
-    will change behaviour from the documented results depending on what
-    features are enabled on your test account :( 
-
-  Change: e19b5a6dbe6e97ad0c7bcb35336429d9f96a277f
-  Author: Jason (Jayce^) Hall <jayce@lug-nut.com>
-  Date : 2011-05-17 11:36:56 +0000
-
-    Add some basic size truncation for the specs city/state/address 
-
-  Change: e981cbaaf9133b6ed4100c787cfd2816ac1b6bc5
-  Author: Jason (Jayce^) Hall <jayce@lug-nut.com>
-  Date : 2011-02-15 13:26:59 +0000
-
-    replace prints with warn, as this broke one usage that wrapped the
-    stdout.. 
-
-  Change: fb1094d9559f1082c17b6b79197acb4b5ddeb014
-  Author: Jason (Jayce^) Hall <jayce@lug-nut.com>
-  Date : 2010-11-15 16:15:14 +0000
-
-    Merge branch 'master' of
-    github.com:Jayceh/Business--OnlinePayment--Litle
-
-    Conflicts:
-
-    Litle.pm 
-
-  Change: 054c2e2ebe30127e4c7dcf31ee4eb1a98ffc098a
-  Author: Jason (Jayce^) Hall <jayce@lug-nut.com>
-  Date : 2010-10-13 13:05:38 +0000
-
-    Apparently deleted at some point, code that blocks you from adding
-    lineitems to level III data on captures if you have more than 99
-    lineitems (100 and up will break the spec) 
-
-  Change: e601ce78c19cf03d9b0b44119d09f6d1d23377fc
-  Author: Jason Hall <jayce@wyatt.(none)>
-  Date : 2010-08-27 09:36:29 +0000
-
-    Visa only allows 99 lineitems or less. If you have more, don't pass
-    'em at all 
+    Several bugfixes. 
 
 ================================================
-Plus 5 releases after 2011-12-06 00:00:00 +0000.
+Plus 6 releases after 2012-12-17 00:00:00 +0000.
 ================================================

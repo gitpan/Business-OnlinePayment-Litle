@@ -4,7 +4,7 @@ author:
   - 'Jason Hall <jayce@cpan.org>'
 build_requires: {}
 dynamic_config: 0
-generated_by: 'Dist::Zilla version 4.300028, CPAN::Meta::Converter version 2.120921'
+generated_by: 'Dist::Zilla version 5.006, CPAN::Meta::Converter version 2.133380'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -25,4 +25,4 @@ requires:
   Tie::IxHash: 0
   XML::Simple: 0
   XML::Writer: 0
-version: 0.935
+version: 0.938
