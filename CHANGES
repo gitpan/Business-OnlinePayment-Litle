@@ -1,10 +1,17 @@
 ==================================================
-Changes from 2012-12-17 00:00:00 +0000 to present.
+Changes from 2012-12-18 00:00:00 +0000 to present.
 ==================================================
 
 ------------------------------------------
-version 0.938 at 2013-12-17 22:22:10 +0000
+version 0.939 at 2013-12-18 16:25:45 +0000
 ------------------------------------------
+
+  Change: 22ac87b8a9aac14f92ff64da99cbb10e3fd75ddb
+  Author: Jason Terry <jterry@jterry-mac.local>
+  Date : 2013-12-18 09:22:46 +0000
+
+    cert used to be the default, so adjust the new default to match using
+    postlive (instead of the new prelive) 
 
   Change: 9a08a87f0d6b1ab642490268f6afd93b24eb1a44
   Author: Jason Terry <jterry@jterry-mac.local>
@@ -300,5 +307,5 @@ version 0.936 at 2013-01-14 22:47:09 +0000
     Several bugfixes. 
 
 ================================================
-Plus 6 releases after 2012-12-17 00:00:00 +0000.
+Plus 6 releases after 2012-12-18 00:00:00 +0000.
 ================================================
